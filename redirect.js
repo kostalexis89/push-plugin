@@ -1,18 +1,16 @@
-fetch("ttps://kostalexis89.github.io/push-plugin/asset-manifest.json")
+fetch("https://kostalexis89.github.io/push-plugin/asset-manifest.json")
   .then((response) => {
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      throw new Error("Failed to load asset-manifest.json");
     }
     return response.json();
   })
   .then((manifest) => {
-    const mainJsPath =
-      manifest.files["main.js"] ||
-      Object.values(manifest.files).find((file) => file.endsWith(".js"));
+    const mainJsPath = manifest.files["main.js"];
 
     if (mainJsPath) {
       const script = document.createElement("script");
-      script.src = `https://your-username.github.io/repo-name${mainJsPath}`;
+      script.src = `https://kostalexis89.github.io${mainJsPath}`; // Fixing path
       script.defer = true;
       document.head.appendChild(script);
     } else {
