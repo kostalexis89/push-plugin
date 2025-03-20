@@ -4,9 +4,24 @@ const App = ({ content, uri, tags }) => {
   const [selectedTags, setSelectedTags] = useState(new Set());
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
+  const [parsedData, setParsedData] = useState(null);
 
   useEffect(() => {
-    console.log("Content:", content);
+    if (typeof content === "string") {
+      try {
+        setParsedData(JSON.parse(content));
+      } catch (error) {
+        console.error("Invalid JSON:", error);
+      }
+    } else {
+      setParsedData(content); // If it's already an object, use it directly
+    }
+  }, [content]);
+
+  console.log(parsedData);
+
+  useEffect(() => {
+    console.log(content);
     console.log("URI:", uri);
     console.log("Tags from StiboX:", tags);
   }, [content, uri, tags]);
