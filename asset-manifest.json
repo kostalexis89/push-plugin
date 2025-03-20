@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/push-plugin/static/js/main.cc21c8b9.js",
+    "main.js": "/push-plugin/static/js/main.e8043fb8.js",
     "index.html": "/push-plugin/index.html",
-    "main.cc21c8b9.js.map": "/push-plugin/static/js/main.cc21c8b9.js.map"
+    "main.e8043fb8.js.map": "/push-plugin/static/js/main.e8043fb8.js.map"
   },
   "entrypoints": [
-    "static/js/main.cc21c8b9.js"
+    "static/js/main.e8043fb8.js"
   ]
 }
