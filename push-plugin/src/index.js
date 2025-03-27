@@ -2,6 +2,24 @@ import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
 
+const dummyTags = [
+  "Breaking News",
+  "Sports",
+  "Technology",
+  "Entertainment",
+  "Health",
+  "Science",
+  "Politics",
+  "Finance",
+  "Travel",
+  "Food",
+  "Gaming",
+  "Weather",
+  "Education",
+  "Movies",
+  "Music",
+];
+
 class PushPlugin extends HTMLElement {
   constructor() {
     super();
@@ -18,11 +36,18 @@ class PushPlugin extends HTMLElement {
     // Get props from attributes
     const content = this.getAttribute("content") || "";
     const uri = this.getAttribute("uri") || "";
-    const tags = JSON.parse(this.getAttribute("tags") || "[]");
+    const pushConfig = JSON.parse(this.getAttribute("pushConfig") || "{}");
+
+    console.log(pushConfig);
 
     // Render the React component
     ReactDOM.render(
-      <App content={content} uri={uri} tags={tags} />,
+      <App
+        content={content}
+        uri={uri}
+        tags={dummyTags}
+        pushConfig={pushConfig}
+      />,
       mountPoint
     );
 

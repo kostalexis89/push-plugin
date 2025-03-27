@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
+import MultiSelect from "./components/MultiSelect.js";
+import "./App.css";
 
-const App = ({ content, uri, tags }) => {
-  const [selectedTags, setSelectedTags] = useState(new Set());
+const App = ({ content, uri, tags, pushConfig }) => {
+  const [selectedTags, setSelectedTags] = useState([]);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [parsedData, setParsedData] = useState(null);
+  const [tags2, setTags2] = useState([]);
 
   useEffect(() => {
     if (typeof content === "string") {
@@ -14,30 +17,26 @@ const App = ({ content, uri, tags }) => {
         console.error("Invalid JSON:", error);
       }
     } else {
-      setParsedData(content); // If it's already an object, use it directly
+      setParsedData(content);
     }
   }, [content]);
 
   console.log(parsedData);
+  console.log(pushConfig);
 
   useEffect(() => {
-    console.log(content);
-    console.log("URI:", uri);
-    console.log("Tags from StiboX:", tags);
-  }, [content, uri, tags]);
-
-  const addTag = (event) => {
-    const tag = event.target.value;
-    if (tag && !selectedTags.has(tag)) {
-      setSelectedTags(new Set([...selectedTags, tag]));
-    }
-  };
-
-  const removeTag = (tag) => {
-    const newTags = new Set(selectedTags);
-    newTags.delete(tag);
-    setSelectedTags(newTags);
-  };
+    fetch(
+      `${pushConfig["api-url"]}${pushConfig.clientId}/tags/${pushConfig.applId}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${pushConfig.token}` },
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setTags2(data);
+      });
+  }, [pushConfig]);
 
   const sendPush = () => {
     if (selectedTags.size === 0) {
@@ -63,70 +62,121 @@ const App = ({ content, uri, tags }) => {
   };
 
   return (
-    <div style={{ padding: "10px", fontFamily: "Arial", width: "100%" }}>
-      <h2>Push Plugin</h2>
-      {content && (
-        <pre style={{ background: "#f4f4f4", padding: "10px" }}>{content}</pre>
-      )}
-      {uri && (
-        <p>
-          <strong>Article URI:</strong> {uri}
-        </p>
-      )}
+    <div style={{ padding: "10px", fontFamily: "Arial", width: "96%" }}>
+      <MultiSelect
+        data={[
+          {
+            name: "default",
+            tags: [
+              { id: 2532, name: "Breaking news - DE" },
+              { id: 2534, name: "Big Story - DE" },
+              { id: 2542, name: "Sport - DE" },
+              { id: 147, name: "Suggestions TV" },
+              { id: 2544, name: "Breaking news - FR" },
+            ],
+          },
+          {
+            name: "browser",
+            id: 110,
+            tags: [
+              { id: 112, name: "Sports" },
+              { id: 113, name: "Empfehlungen der Redaktion" },
+              { id: 124, name: "Big Story" },
+              { id: 125, name: "Demnächst im Kino" },
+              { id: 126, name: "TV-Tipp" },
+              { id: 127, name: "Kolumne am Mittag" },
+              { id: 128, name: "Monatshoroskop" },
+              { id: 164, name: "Sprachpfleger" },
+              { id: 165, name: "Bötschi fragt" },
+              { id: 111, name: "Breaking News" },
+            ],
+            groups: [],
+          },
+          {
+            name: "tag group 1",
+            id: 2690,
+            sourceId: "tag group sr 1",
+            tags: [],
+            groups: [
+              {
+                name: "tag group 2 updated 1",
+                id: 2691,
+                sourceId: "tag group sr 2  updated 1",
+                tags: [],
+                groups: [],
+              },
+              {
+                name: "tag group 2 updated 1",
+                id: 2692,
+                sourceId: "tag group sr 2  updated 1",
+                tags: [],
+                groups: [],
+              },
+            ],
+          },
+        ]}
+        setSelectedItems={setSelectedTags}
+        selectedItems={selectedTags}
+      />
 
-      <label>Find Tags</label>
-      <select onChange={addTag} style={{ width: "100%", padding: "5px" }}>
-        <option value="">Select a tag</option>
-        {tags?.map((tag) => (
-          <option key={tag} value={tag}>
-            {tag}
-          </option>
-        ))}
-      </select>
-
-      <div>
-        {[...selectedTags].map((tag) => (
-          <span
-            key={tag}
-            style={{
-              margin: "5px",
-              padding: "5px",
-              background: "#ddd",
-              borderRadius: "5px",
-            }}
-          >
-            {tag} <button onClick={() => removeTag(tag)}>x</button>
-          </span>
-        ))}
-      </div>
-
-      <label>Push Title</label>
+      <label style={{ fontWeight: "bold", fontSize: "14px" }}>Push Title</label>
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        style={{ width: "100%", padding: "5px" }}
+        style={{
+          width: "100%",
+          padding: "8px 0",
+          marginBottom: "10px",
+          border: "1px solid #ccc",
+          borderRadius: "5px",
+          resize: "none",
+          outline: "none",
+        }}
+        onFocus={(e) => (e.target.style.borderColor = "#555")}
+        onBlur={(e) => (e.target.style.borderColor = "#ccc")}
       />
 
-      <label>Push Message</label>
+      <label style={{ fontWeight: "bold", fontSize: "14px" }}>
+        Push Message
+      </label>
       <textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        style={{ width: "100%", padding: "5px" }}
+        style={{
+          width: "100%",
+          padding: "8px 0",
+          height: "60px",
+          border: "1px solid #ccc",
+          borderRadius: "5px",
+          resize: "none",
+          outline: "none",
+        }}
+        onFocus={(e) => (e.target.style.borderColor = "#555")}
+        onBlur={(e) => (e.target.style.borderColor = "#ccc")}
       />
 
-      <button
-        onClick={sendPush}
+      <div
         style={{
+          display: "flex",
+          justifyContent: "flex-end",
           marginTop: "10px",
-          padding: "8px 16px",
-          background: "black",
-          color: "white",
-          border: "none",
-          cursor: "pointer",
         }}
       >
-        Send Push
-      </button>
+        <button
+          onClick={sendPush}
+          style={{
+            padding: "6px 24px",
+            background: selectedTags.size > 0 ? "black" : "#ccc",
+            color: "white",
+            border: "none",
+            cursor: selectedTags.size > 0 ? "pointer" : "not-allowed",
+            fontSize: "14px",
+          }}
+          disabled={selectedTags.size === 0}
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
 };
