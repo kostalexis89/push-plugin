@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
+import "./App.css";
 
 const dummyTags = [
   "Breaking News",
@@ -23,24 +24,31 @@ const dummyTags = [
 class PushPlugin extends HTMLElement {
   constructor() {
     super();
-    this.rendered = false; // Flag to track if the component has been rendered
+    this.rendered = false;
+    this.attachShadow({ mode: "open" }); // Use Shadow DOM
   }
 
   connectedCallback() {
-    if (this.rendered) return; // Avoid re-rendering if already rendered
+    if (this.rendered) return;
 
-    // Create a div for mounting React
+    // Create a mount point inside Shadow DOM
     const mountPoint = document.createElement("div");
-    this.appendChild(mountPoint); // Append directly to the custom element (light DOM)
+    this.shadowRoot.appendChild(mountPoint);
+
+    // Inject styles inside Shadow DOM
+    const style = document.createElement("style");
+    style.textContent = `
+     .input-with-placeholder::placeholder {
+  padding: 8px!important;
+}
+    `;
+    this.shadowRoot.appendChild(style);
 
     // Get props from attributes
     const content = this.getAttribute("content") || "";
     const uri = this.getAttribute("uri") || "";
     const pushConfig = JSON.parse(this.getAttribute("pushConfig") || "{}");
 
-    console.log(pushConfig);
-
-    // Render the React component
     ReactDOM.render(
       <App
         content={content}
@@ -51,9 +59,8 @@ class PushPlugin extends HTMLElement {
       mountPoint
     );
 
-    this.rendered = true; // Set the flag to true once rendered
+    this.rendered = true;
   }
 }
 
-// Define the web component
 customElements.define("push-plugin-web-component", PushPlugin);

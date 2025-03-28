@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import MultiSelect from "./components/MultiSelect.js";
+import "./App.css";
 
 const App = ({ content, uri, tags, pushConfig }) => {
   const [selectedTags, setSelectedTags] = useState([]);
@@ -61,7 +62,7 @@ const App = ({ content, uri, tags, pushConfig }) => {
   };
 
   return (
-    <div style={{ padding: "10px", fontFamily: "Arial", width: "96%" }}>
+    <div>
       <MultiSelect
         data={[
           {
