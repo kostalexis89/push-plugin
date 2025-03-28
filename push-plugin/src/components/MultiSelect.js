@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import styles from "./MultiSelect.module.css";
 
 // Function to flatten data
 function flattenData(data) {
@@ -144,7 +145,7 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
       {/* Autocomplete MultiSelect */}
       <div style={{ position: "relative" }}>
         <input
-          className="input-with-placeholder"
+          className={styles["input-with-placeholder"]}
           ref={inputRef} // Attach ref to the input field
           type="text"
           placeholder="Select items..."

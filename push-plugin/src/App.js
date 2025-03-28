@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import MultiSelect from "./components/MultiSelect.js";
-import "./App.css";
 
 const App = ({ content, uri, tags, pushConfig }) => {
   const [selectedTags, setSelectedTags] = useState([]);
