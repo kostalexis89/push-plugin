@@ -1,1 +1,0 @@
-{"version":3,"file":"static/css/main.96e740c9.css","mappings":"AAAA,qCACE,qBACF,CAEA,wBACE,8BACF","sources":["App.css"],"sourcesContent":[".input-with-placeholder::placeholder {\n  padding: 8px !important;\n}\n\n.input-with-placeholder {\n  background-color: red !important;\n}"],"names":[],"sourceRoot":""}
