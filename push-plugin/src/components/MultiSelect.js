@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-
 // Function to flatten data
 function flattenData(data) {
   let result = [];
@@ -147,7 +146,7 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
           className="input-with-placeholder"
           ref={inputRef} // Attach ref to the input field
           type="text"
-          placeholder="Select items..."
+          placeholder="Select 2items..."
           value={query}
           onChange={handleInputChange}
           onFocus={handleInputFocus} // Open dropdown when focused

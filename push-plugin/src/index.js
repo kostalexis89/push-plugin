@@ -6,30 +6,51 @@ import "./App.css";
 class PushPlugin extends HTMLElement {
   constructor() {
     super();
-    this.rendered = false; // Flag to track if the component has been rendered
+    this.rendered = false;
   }
 
-  connectedCallback() {
-    if (this.rendered) return; // Avoid re-rendering if already rendered
+  async connectedCallback() {
+    if (this.rendered) return;
 
-    // Create a div for mounting React
+    const BASE_URL = "https://kostalexis89.github.io/push-plugin";
+
+    // Load CSS dynamically
+    if (!document.querySelector("#push-plugin-styles")) {
+      try {
+        const manifestResponse = await fetch(`${BASE_URL}/asset-manifest.json`);
+        const manifest = await manifestResponse.json();
+
+        let cssFileName = manifest.files["main.css"];
+
+        if (cssFileName.startsWith("/push-plugin/")) {
+          cssFileName = cssFileName.replace("/push-plugin", ""); // Fix duplicated path
+        }
+
+        const link = document.createElement("link");
+        link.id = "push-plugin-styles";
+        link.rel = "stylesheet";
+        link.href = `${BASE_URL}${cssFileName}`;
+        document.head.appendChild(link);
+      } catch (error) {
+        console.error("Error loading asset-manifest.json:", error);
+      }
+    }
+
+    // Create React mount point
     const mountPoint = document.createElement("div");
-    this.appendChild(mountPoint); // Append directly to the custom element (light DOM)
+    this.appendChild(mountPoint);
 
-    // Get props from attributes
     const content = this.getAttribute("content") || "";
     const uri = this.getAttribute("uri") || "";
     const pushConfig = JSON.parse(this.getAttribute("pushConfig") || "{}");
 
-    // Render the React component
     ReactDOM.render(
       <App content={content} uri={uri} pushConfig={pushConfig} />,
       mountPoint
     );
 
-    this.rendered = true; // Set the flag to true once rendered
+    this.rendered = true;
   }
 }
 
-// Define the web component
 customElements.define("push-plugin-web-component", PushPlugin);
