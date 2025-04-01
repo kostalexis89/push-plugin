@@ -2,41 +2,27 @@ import React, { useState, useEffect } from "react";
 import MultiSelect from "./components/MultiSelect.js";
 import "./App.css";
 
-const App = ({ content, uri, tags, pushConfig }) => {
+const App = ({ data }) => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
-  const [parsedData, setParsedData] = useState(null);
   const [tags2, setTags2] = useState([]);
 
-  useEffect(() => {
-    if (typeof content === "string") {
-      try {
-        setParsedData(JSON.parse(content));
-      } catch (error) {
-        console.error("Invalid JSON:", error);
-      }
-    } else {
-      setParsedData(content);
-    }
-  }, [content]);
-
-  console.log(parsedData);
-  console.log(pushConfig);
+  console.log(data);
 
   useEffect(() => {
     fetch(
-      `${pushConfig["api-url"]}${pushConfig.clientId}/tags/${pushConfig.applId}`,
+      `${data?.pushConfig["api-url"]}${data?.pushConfig.clientId}/tags/${data?.pushConfig.applId}`,
       {
         method: "GET",
-        headers: { Authorization: `Bearer ${pushConfig.token}` },
+        headers: { Authorization: `Bearer ${data?.pushConfig.token}` },
       }
     )
       .then((res) => res.json())
       .then((data) => {
         setTags2(data);
       });
-  }, [pushConfig]);
+  }, [data?.pushConfig]);
 
   const sendPush = () => {
     if (selectedTags.size === 0) {
@@ -64,57 +50,7 @@ const App = ({ content, uri, tags, pushConfig }) => {
   return (
     <div>
       <MultiSelect
-        data={[
-          {
-            name: "default",
-            tags: [
-              { id: 2532, name: "Breaking news - DE" },
-              { id: 2534, name: "Big Story - DE" },
-              { id: 2542, name: "Sport - DE" },
-              { id: 147, name: "Suggestions TV" },
-              { id: 2544, name: "Breaking news - FR" },
-            ],
-          },
-          {
-            name: "browser",
-            id: 110,
-            tags: [
-              { id: 112, name: "Sports" },
-              { id: 113, name: "Empfehlungen der Redaktion" },
-              { id: 124, name: "Big Story" },
-              { id: 125, name: "Demnächst im Kino" },
-              { id: 126, name: "TV-Tipp" },
-              { id: 127, name: "Kolumne am Mittag" },
-              { id: 128, name: "Monatshoroskop" },
-              { id: 164, name: "Sprachpfleger" },
-              { id: 165, name: "Bötschi fragt" },
-              { id: 111, name: "Breaking News" },
-            ],
-            groups: [],
-          },
-          {
-            name: "tag group 1",
-            id: 2690,
-            sourceId: "tag group sr 1",
-            tags: [],
-            groups: [
-              {
-                name: "tag group 2 updated 1",
-                id: 2691,
-                sourceId: "tag group sr 2  updated 1",
-                tags: [],
-                groups: [],
-              },
-              {
-                name: "tag group 2 updated 1",
-                id: 2692,
-                sourceId: "tag group sr 2  updated 1",
-                tags: [],
-                groups: [],
-              },
-            ],
-          },
-        ]}
+        data={tags2}
         setSelectedItems={setSelectedTags}
         selectedItems={selectedTags}
       />

@@ -3,6 +3,19 @@ import ReactDOM from "react-dom";
 import App from "./App";
 import "./App.css";
 
+const dummyData = {
+  content: {
+    "storyline-title": "Initial Title",
+    "storyline-leadtext": "Initial Lead text",
+  },
+  pushConfig: {
+    "api-url": "https://webpush-demo.ethinking.de/push-api/v3/",
+    clientId: "test",
+    applId: "2614",
+    token: "Qcb9ZasLCTU0Oq9C6EnO2fNLDSAzXro2e",
+  },
+};
+
 class PushPlugin extends HTMLElement {
   constructor() {
     super();
@@ -40,14 +53,11 @@ class PushPlugin extends HTMLElement {
     const mountPoint = document.createElement("div");
     this.appendChild(mountPoint);
 
-    const content = this.getAttribute("content") || "";
-    const uri = this.getAttribute("uri") || "";
-    const pushConfig = JSON.parse(this.getAttribute("pushConfig") || "{}");
-
-    ReactDOM.render(
-      <App content={content} uri={uri} pushConfig={pushConfig} />,
-      mountPoint
+    const data = JSON.parse(
+      this.getAttribute("data") || JSON.stringify(dummyData)
     );
+    console.log(data);
+    ReactDOM.render(<App data={data} />, mountPoint);
 
     this.rendered = true;
   }
