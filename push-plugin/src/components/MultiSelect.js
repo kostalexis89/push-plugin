@@ -38,6 +38,7 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // For showing/hiding the dropdown
   const dropdownRef = useRef(null); // Ref to the dropdown container
   const inputRef = useRef(null); // Ref to the input field
+  const [preventQueryClear, setPreventQueryClear] = useState(false);
 
   console.log(selectedItems);
 
@@ -55,6 +56,9 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
         !inputRef.current.contains(event.target)
       ) {
         setIsDropdownOpen(false);
+        if (!preventQueryClear) {
+          setQuery("");
+        }
       }
     };
 
@@ -63,9 +67,10 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [preventQueryClear]);
 
   const handleSelect = (item) => {
+    setPreventQueryClear(true);
     // Toggle selection
     if (selectedItems.some((i) => i.id === item.id)) {
       // Deselect the item
@@ -76,6 +81,9 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
       // Select the item
       setSelectedItems([...selectedItems, item]);
     }
+    setTimeout(() => {
+      setPreventQueryClear(false);
+    }, 200);
   };
 
   const handleRemoveItem = (itemToRemove) => {
@@ -142,21 +150,52 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
 
       {/* Autocomplete MultiSelect */}
       <div style={{ position: "relative" }}>
-        <input
-          className="input-with-placeholder"
-          ref={inputRef} // Attach ref to the input field
-          type="text"
-          placeholder="Select 2items..."
-          value={query}
-          onChange={handleInputChange}
-          onFocus={handleInputFocus} // Open dropdown when focused
-          style={{
-            width: "100%",
-            padding: "8px 0",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-          }}
-        />
+        <div
+          style={{ position: "relative", width: "100%", marginBottom: "10px" }}
+        >
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Select items..."
+            value={query}
+            onChange={handleInputChange}
+            onFocus={handleInputFocus}
+            style={{
+              width: "100%",
+              padding: "8px",
+              paddingRight: "30px", // Make room for arrow
+              border: "1px solid #ccc",
+              borderRadius: "5px",
+              resize: "none",
+              outline: "none",
+              boxSizing: "border-box",
+              cursor: "pointer", // Add pointer cursor to entire input
+            }}
+          />
+          <button
+            type="button"
+            style={{
+              position: "absolute",
+              right: "12px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "#666",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "0",
+              fontSize: "inherit",
+            }}
+            onClick={() => {
+              inputRef.current.focus();
+              setIsDropdownOpen(true);
+            }}
+            aria-label="Toggle dropdown"
+          >
+            ▼
+          </button>
+        </div>
+
         {isDropdownOpen && (
           <div
             ref={dropdownRef}
@@ -179,10 +218,17 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
                 (i) => i.id === item.id && i.name === item.name
               );
               return (
-                <div
+                <button
                   key={item.id}
                   onClick={() => handleSelect(item)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleSelect(item);
+                    }
+                  }}
                   style={{
+                    width: "100%", // Add this to make button take full width
                     padding: "8px 12px", // Reduced padding for more compact items
                     cursor: "pointer",
                     display: "flex",
@@ -191,6 +237,9 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
                     transition: "background-color 0.3s ease", // Smooth background transition
                     fontSize: "14px", // Slightly smaller font size
                     gap: "10px", // Tighten the space between the checkmark and text
+                    border: "none", // Remove default button border
+                    outline: "none", // Remove default button outline
+                    textAlign: "left", // Align text to the left
                   }}
                 >
                   <span
@@ -204,7 +253,7 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
                   <span style={{ fontSize: "14px", color: "#333" }}>
                     {item.name}
                   </span>
-                </div>
+                </button>
               );
             })}
           </div>

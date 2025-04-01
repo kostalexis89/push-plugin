@@ -1,3 +1,7 @@
-.input-with-placeholder::placeholder {
-  padding: 8px;
+* {
+  font-family: Arial, sans-serif;
 }
+
+/* .input-with-placeholder::placeholder {
+  padding: 8px;
+} */
