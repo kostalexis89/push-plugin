@@ -119,8 +119,14 @@ const App = ({ content, uri, tags, pushConfig }) => {
         selectedItems={selectedTags}
       />
 
-      <label style={{ fontWeight: "bold", fontSize: "14px" }}>Push Title</label>
+      <label
+        htmlFor="pushTitle"
+        style={{ fontWeight: "bold", fontSize: "14px" }}
+      >
+        Push Title
+      </label>
       <input
+        id="pushTitle"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         style={{
@@ -136,10 +142,14 @@ const App = ({ content, uri, tags, pushConfig }) => {
         onBlur={(e) => (e.target.style.borderColor = "#ccc")}
       />
 
-      <label style={{ fontWeight: "bold", fontSize: "14px" }}>
+      <label
+        htmlFor="pushMessage"
+        style={{ fontWeight: "bold", fontSize: "14px" }}
+      >
         Push Message
       </label>
       <textarea
+        id="pushMessage"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         style={{

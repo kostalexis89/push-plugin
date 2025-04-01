@@ -40,8 +40,6 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
   const inputRef = useRef(null); // Ref to the input field
   const [preventQueryClear, setPreventQueryClear] = useState(false);
 
-  console.log(selectedItems);
-
   useEffect(() => {
     setFlattenedData(flattenData(data));
   }, [data]);
@@ -105,6 +103,13 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
     setIsDropdownOpen(true); // Open dropdown when input is focused
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      setIsDropdownOpen(true);
+    }
+  };
+
   return (
     <div style={{ paddingBottom: "10px" }}>
       <label style={{ fontWeight: "bold", fontSize: "14px" }}>Push Tags</label>
@@ -146,6 +151,25 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
             </button>
           </span>
         ))}
+        {selectedItems.length > 0 && (
+          <button
+            onClick={() => setSelectedItems([])}
+            style={{
+              border: "none",
+              background: "transparent",
+              color: "#666",
+              cursor: "pointer",
+              fontSize: "16px",
+              padding: "5px",
+              display: "flex",
+              alignItems: "center",
+              marginLeft: "4px",
+            }}
+            title="Clear all" // Adds tooltip on hover
+          >
+            🗑️
+          </button>
+        )}
       </div>
 
       {/* Autocomplete MultiSelect */}
@@ -160,6 +184,7 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
             value={query}
             onChange={handleInputChange}
             onFocus={handleInputFocus}
+            onKeyDown={handleKeyDown}
             style={{
               width: "100%",
               padding: "8px",
@@ -241,6 +266,16 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
                     outline: "none", // Remove default button outline
                     textAlign: "left", // Align text to the left
                   }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = exists
+                      ? "#d0d0d0"
+                      : "#f5f5f5";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = exists
+                      ? "#e0e0e0"
+                      : "#fff";
+                  }}
                 >
                   <span
                     style={{
@@ -263,4 +298,4 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
   );
 };
 
-export default MultiSelect;
+export default React.memo(MultiSelect);
