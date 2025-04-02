@@ -44,6 +44,18 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
     setFlattenedData(flattenData(data));
   }, [data]);
 
+  // First, add a meta tag in your HTML to prevent zooming
+  useEffect(() => {
+    const metaViewport = document.querySelector('meta[name="viewport"]');
+    if (!metaViewport) {
+      const meta = document.createElement("meta");
+      meta.name = "viewport";
+      meta.content =
+        "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
+      document.head.appendChild(meta);
+    }
+  }, []);
+
   // Close dropdown if clicking outside of it
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -195,6 +207,7 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
               outline: "none",
               boxSizing: "border-box",
               cursor: "pointer", // Add pointer cursor to entire input
+              fontSize: "16px", // iOS minimum font size to prevent zoom
             }}
           />
           <button
@@ -246,46 +259,44 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
                 <button
                   key={item.id}
                   onClick={() => handleSelect(item)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handleSelect(item);
-                    }
-                  }}
                   style={{
-                    width: "100%", // Add this to make button take full width
-                    padding: "8px 12px", // Reduced padding for more compact items
+                    width: "100%",
+                    padding: "4px 8px", // Reduced padding
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
                     backgroundColor: exists ? "#e0e0e0" : "#fff",
-                    transition: "background-color 0.3s ease", // Smooth background transition
-                    fontSize: "14px", // Slightly smaller font size
-                    gap: "10px", // Tighten the space between the checkmark and text
-                    border: "none", // Remove default button border
-                    outline: "none", // Remove default button outline
-                    textAlign: "left", // Align text to the left
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = exists
-                      ? "#d0d0d0"
-                      : "#f5f5f5";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = exists
-                      ? "#e0e0e0"
-                      : "#fff";
+                    transition: "background-color 0.3s ease",
+                    fontSize: "16px", // Match input font size
+                    gap: "8px", // Reduced gap
+                    border: "none",
+                    outline: "none",
+                    textAlign: "left",
+                    height: "32px", // Reduced height
+                    boxSizing: "border-box",
+                    minHeight: "32px", // Add minimum height
+                    lineHeight: "1.2", // Add line height to control text spacing
+                    touchAction: "manipulation", // Prevent double-tap zoom
                   }}
                 >
                   <span
                     style={{
-                      fontSize: "14px", // Slightly bigger checkmark
-                      color: exists ? "#333" : "#ccc", // Checkmark color
+                      display: "inline-block",
+                      width: "14px", // Fixed width for checkmark
+                      fontSize: "12px", // Smaller checkmark
+                      color: exists ? "#333" : "#ccc",
+                      textAlign: "center", // Center the checkmark
                     }}
                   >
-                    {exists ? "✔" : ""}
+                    {exists ? "✓" : ""} {/* Changed to simpler checkmark */}
                   </span>
-                  <span style={{ fontSize: "14px", color: "#333" }}>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      color: "#333",
+                      flex: 1, // Take remaining space
+                    }}
+                  >
                     {item.name}
                   </span>
                 </button>
