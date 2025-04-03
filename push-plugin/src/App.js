@@ -6,11 +6,17 @@ const App = ({ data }) => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
-  const [tags2, setTags2] = useState([]);
-
-  console.log(data);
+  const [tags, setTags] = useState([]);
 
   useEffect(() => {
+    setTitle(data?.content["storyline-title"] || "");
+    setMessage(data?.content["storyline-leadtext"] || "");
+  }, [data]);
+
+  console.log(title);
+
+  useEffect(() => {
+    console.log("Fetching tags...");
     fetch(
       `${data?.pushConfig["api-url"]}${data?.pushConfig.clientId}/tags/${data?.pushConfig.applId}`,
       {
@@ -20,7 +26,7 @@ const App = ({ data }) => {
     )
       .then((res) => res.json())
       .then((data) => {
-        setTags2(data);
+        setTags(data);
       });
   }, [data?.pushConfig]);
 
@@ -50,7 +56,7 @@ const App = ({ data }) => {
   return (
     <div>
       <MultiSelect
-        data={tags2}
+        data={tags}
         setSelectedItems={setSelectedTags}
         selectedItems={selectedTags}
       />
@@ -67,12 +73,13 @@ const App = ({ data }) => {
         onChange={(e) => setTitle(e.target.value)}
         style={{
           width: "100%",
-          padding: "8px 0",
+          padding: "8px", // Changed from "8px 0" to "8px"
           marginBottom: "10px",
           border: "1px solid #ccc",
           borderRadius: "5px",
           resize: "none",
           outline: "none",
+          boxSizing: "border-box", // Add this to match MultiSelect
         }}
         onFocus={(e) => (e.target.style.borderColor = "#555")}
         onBlur={(e) => (e.target.style.borderColor = "#ccc")}
@@ -90,12 +97,13 @@ const App = ({ data }) => {
         onChange={(e) => setMessage(e.target.value)}
         style={{
           width: "100%",
-          padding: "8px 0",
+          padding: "8px", // Changed from "8px 0" to "8px"
           height: "60px",
           border: "1px solid #ccc",
           borderRadius: "5px",
           resize: "none",
           outline: "none",
+          boxSizing: "border-box", // Add this to match MultiSelect
         }}
         onFocus={(e) => (e.target.style.borderColor = "#555")}
         onBlur={(e) => (e.target.style.borderColor = "#ccc")}

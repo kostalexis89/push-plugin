@@ -20,9 +20,29 @@ class PushPlugin extends HTMLElement {
   constructor() {
     super();
     this.rendered = false;
+    this.mountPoint = null; // Add this to store the mount point
+  }
+
+  static get observedAttributes() {
+    return ["data"]; // Observe the 'data' attribute
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "data" && oldValue !== newValue) {
+      this.handleDataChange(JSON.parse(newValue)); // Handle the updated data
+    }
+  }
+
+  handleDataChange(data) {
+    console.log("Updated data received:", data);
+    if (this.mountPoint) {
+      // Re-render React app with new data
+      ReactDOM.render(<App data={data} />, this.mountPoint);
+    }
   }
 
   async connectedCallback() {
+    console.log(this.getAttribute("data"));
     if (this.rendered) return;
 
     const BASE_URL = "https://kostalexis89.github.io/push-plugin";
@@ -49,18 +69,20 @@ class PushPlugin extends HTMLElement {
       }
     }
 
-    // Create React mount point
-    const mountPoint = document.createElement("div");
-    this.appendChild(mountPoint);
+    // Store mount point reference
+    this.mountPoint = document.createElement("div");
+    this.appendChild(this.mountPoint);
 
     const data = JSON.parse(
       this.getAttribute("data") || JSON.stringify(dummyData)
     );
     console.log(data);
-    ReactDOM.render(<App data={data} />, mountPoint);
+    ReactDOM.render(<App data={data} />, this.mountPoint);
 
     this.rendered = true;
   }
 }
 
-customElements.define("push-plugin-web-component", PushPlugin);
+if (!customElements.get("push-plugin-web-component")) {
+  customElements.define("push-plugin-web-component", PushPlugin);
+}

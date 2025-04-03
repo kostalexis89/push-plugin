@@ -124,9 +124,8 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
 
   return (
     <div style={{ paddingBottom: "10px" }}>
-      <label style={{ fontWeight: "bold", fontSize: "14px" }}>Push Tags</label>
+      <label style={{ fontSize: "14px" }}>Push Tags</label>
 
-      {/* Selected items display */}
       <div
         style={{
           display: "flex",
@@ -140,11 +139,13 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
             key={item.id}
             style={{
               background: "#eee",
-              padding: "5px 10px",
-              borderRadius: "5px",
+              padding: "0 10px",
               display: "flex",
               alignItems: "center",
               fontSize: "14px",
+              height: "32px",
+              borderRadius: "4px",
+              boxSizing: "border-box",
             }}
           >
             {item.name}
@@ -154,12 +155,28 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
                 marginLeft: "8px",
                 cursor: "pointer",
                 border: "none",
-                fontWeight: "bold", // Makes the "X" thicker
-                fontSize: "16px",
                 background: "transparent",
+                padding: 0,
+                display: "flex",
+                alignItems: "center",
+                height: "32px",
               }}
             >
-              &#10008;{" "}
+              <svg
+                width="16" // Reduced from 24
+                height="16" // Reduced from 24
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 18L18 6M6 6L18 18"
+                  stroke="#444"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
           </span>
         ))}
@@ -167,86 +184,101 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
           <button
             onClick={() => setSelectedItems([])}
             style={{
+              marginLeft: "8px",
+              cursor: "pointer",
               border: "none",
               background: "transparent",
-              color: "#666",
-              cursor: "pointer",
-              fontSize: "16px",
-              padding: "5px",
+              padding: 0,
               display: "flex",
               alignItems: "center",
-              marginLeft: "4px",
+              height: "32px",
+              pointerEvents: "auto", // This ensures only cursor change on hover
             }}
-            title="Clear all" // Adds tooltip on hover
+            title="Clear all"
           >
-            🗑️
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ pointerEvents: "none" }} // This prevents any hover effects on the SVG
+            >
+              <path
+                d="M20 5H9.37727C9.0269 5 8.69017 5.14684 8.44873 5.40723L3.70711 10.4072C3.31658 10.8215 3.31658 11.4547 3.70711 11.8689L8.44873 16.8689C8.69017 17.1293 9.0269 17.2762 9.37727 17.2762H20C20.5523 17.2762 21 16.8285 21 16.2762V6C21 5.44772 20.5523 5 20 5Z"
+                stroke="#444"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M16 9L12 13M12 9L16 13"
+                stroke="#444"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         )}
       </div>
 
       {/* Autocomplete MultiSelect */}
       <div style={{ position: "relative" }}>
-        <div
-          style={{ position: "relative", width: "100%", marginBottom: "10px" }}
-        >
+        <div style={{ position: "relative", width: "100%" }}>
+          {/* Input field */}
           <input
             ref={inputRef}
             type="text"
-            placeholder="Select items..."
+            placeholder="Find Tags"
             value={query}
             onChange={handleInputChange}
-            onFocus={handleInputFocus}
+            onFocus={(e) => {
+              handleInputFocus();
+            }}
             onKeyDown={handleKeyDown}
             style={{
+              fontSize: "14px",
               width: "100%",
               padding: "8px",
-              paddingRight: "30px", // Make room for arrow
-              border: "1px solid #ccc",
-              borderRadius: "5px",
-              resize: "none",
+              paddingRight: "30px",
+              border: "none",
+              borderBottom: "1px solid #999",
               outline: "none",
               boxSizing: "border-box",
-              cursor: "pointer", // Add pointer cursor to entire input
-              fontSize: "16px", // iOS minimum font size to prevent zoom
+              transition: "border-color 0.2s ease",
             }}
           />
-          <button
-            type="button"
+          {/* Dropdown arrow */}
+          <span
             style={{
               position: "absolute",
-              right: "12px",
+              right: "10px",
               top: "50%",
-              transform: "translateY(-50%)",
+              transform: "translateY(-50%) rotate(180deg)", // Added rotate to make ▲ appear as V
+              fontSize: "12px", // Reduced from 14px
               color: "#666",
-              background: "none",
-              border: "none",
               cursor: "pointer",
-              padding: "0",
-              fontSize: "inherit",
             }}
-            onClick={() => {
-              inputRef.current.focus();
-              setIsDropdownOpen(true);
-            }}
-            aria-label="Toggle dropdown"
+            onClick={() => inputRef.current.focus()}
           >
-            ▼
-          </button>
+            ▲
+          </span>
         </div>
 
         {isDropdownOpen && (
           <div
             ref={dropdownRef}
             style={{
+              backgroundColor: "#f8f8f8",
               position: "absolute",
               top: "100%",
               left: "0",
               right: "0",
               maxHeight: "240px",
               overflowY: "auto",
-              backgroundColor: "#fff",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
+              border: "1px solid #09ab00",
+              borderTop: "1px solid #09ab00",
               zIndex: 100,
               boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)", // Added subtle shadow
             }}
@@ -259,15 +291,23 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
                 <button
                   key={item.id}
                   onClick={() => handleSelect(item)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "rgba(9,171,0,.2)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = exists
+                      ? "rgba(9,171,0,.2)"
+                      : "#fff";
+                  }}
                   style={{
                     width: "100%",
                     padding: "4px 8px", // Reduced padding
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
-                    backgroundColor: exists ? "#e0e0e0" : "#fff",
+                    backgroundColor: exists ? "rgba(9,171,0,.2)" : "#fff",
                     transition: "background-color 0.3s ease",
-                    fontSize: "16px", // Match input font size
+                    fontSize: "14px", // Match input font size
                     gap: "8px", // Reduced gap
                     border: "none",
                     outline: "none",
@@ -283,7 +323,7 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
                     style={{
                       display: "inline-block",
                       width: "14px", // Fixed width for checkmark
-                      fontSize: "12px", // Smaller checkmark
+                      fontSize: "14px", // Smaller checkmark
                       color: exists ? "#333" : "#ccc",
                       textAlign: "center", // Center the checkmark
                     }}
