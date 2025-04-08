@@ -4,15 +4,14 @@ import SendPush from "./components/SendPush.js";
 import "./App.css";
 
 const App = ({ data }) => {
-  console.log("Data received:", data);
   const [selectedTags, setSelectedTags] = useState([]);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [tags, setTags] = useState([]);
 
   useEffect(() => {
-    setTitle(data?.payload["storyline-title"] || "");
-    setMessage(data?.payload["storyline-leadtext"] || "");
+    setTitle(data?.payload.title || "");
+    setMessage(data?.payload.message || "");
   }, [data]);
 
   useEffect(() => {

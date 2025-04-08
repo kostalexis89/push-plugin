@@ -5,8 +5,10 @@ import "./App.css";
 
 const dummyData = {
   payload: {
-    "storyline-title": "Initial Title",
-    "storyline-leadtext": "Initial Lead text",
+    title: "Initial Title",
+    message: "Initial Lead text",
+    url: "https://example.com",
+    entityId: "12345",
   },
   pushConfig: {
     "api-url": "https://webpush-demo.ethinking.de/push-admin-api/v3/",
