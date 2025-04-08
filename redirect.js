@@ -10,7 +10,7 @@ fetch("https://kostalexis89.github.io/push-plugin/asset-manifest.json")
 
     if (mainJsPath) {
       const script = document.createElement("script");
-      script.src = `https://kostalexis89.github.io${mainJsPath}`; // Fixing path
+      script.src = `https://kostalexis89.github.io/push-plugin${mainJsPath}`; // Fixing path
       script.defer = true;
       document.head.appendChild(script);
     } else {
