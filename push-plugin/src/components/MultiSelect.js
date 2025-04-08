@@ -1,50 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
-// Function to flatten data
-function flattenData(data) {
-  let result = [];
-
-  function extractItems(items) {
-    items.forEach((item) => {
-      if (item.tags || item.groups) {
-        if (item.tags) {
-          item.tags.forEach((tag) => {
-            if (!tag.tags && !tag.groups) {
-              result.push(tag);
-            } else {
-              extractItems([tag]);
-            }
-          });
-        }
-        if (item.groups) {
-          item.groups.forEach((group) => {
-            if (!group.tags && !group.groups) {
-              result.push(group);
-            } else {
-              extractItems([group]);
-            }
-          });
-        }
-      }
-    });
-  }
-
-  extractItems(data);
-  return result;
-}
 
 const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
-  const [flattenedData, setFlattenedData] = useState([]);
-  const [query, setQuery] = useState(""); // For filtering input
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // For showing/hiding the dropdown
-  const dropdownRef = useRef(null); // Ref to the dropdown container
-  const inputRef = useRef(null); // Ref to the input field
+  const [query, setQuery] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
   const [preventQueryClear, setPreventQueryClear] = useState(false);
 
-  useEffect(() => {
-    setFlattenedData(flattenData(data));
-  }, [data]);
+  // Remove flattenData usage and just filter the data array directly
+  const filteredData = query
+    ? data.filter((item) =>
+        item.name.toLowerCase().includes(query.toLowerCase())
+      )
+    : data;
 
-  // First, add a meta tag in your HTML to prevent zooming
   useEffect(() => {
     const metaViewport = document.querySelector('meta[name="viewport"]');
     if (!metaViewport) {
@@ -56,7 +25,6 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
     }
   }, []);
 
-  // Close dropdown if clicking outside of it
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -81,14 +49,11 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
 
   const handleSelect = (item) => {
     setPreventQueryClear(true);
-    // Toggle selection
     if (selectedItems.some((i) => i.id === item.id)) {
-      // Deselect the item
       setSelectedItems(
         selectedItems.filter((selected) => selected.id !== item.id)
       );
     } else {
-      // Select the item
       setSelectedItems([...selectedItems, item]);
     }
     setTimeout(() => {
@@ -100,19 +65,13 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
     setSelectedItems(selectedItems.filter((item) => item !== itemToRemove));
   };
 
-  const filteredData = query
-    ? flattenedData.filter((item) =>
-        item.name.toLowerCase().includes(query.toLowerCase())
-      )
-    : flattenedData; // If query is empty, show all items
-
   const handleInputChange = (e) => {
     setQuery(e.target.value);
-    setIsDropdownOpen(true); // Keep dropdown open when user types
+    setIsDropdownOpen(true);
   };
 
   const handleInputFocus = () => {
-    setIsDropdownOpen(true); // Open dropdown when input is focused
+    setIsDropdownOpen(true);
   };
 
   const handleKeyDown = (e) => {
@@ -124,7 +83,7 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
 
   return (
     <div style={{ paddingBottom: "10px" }}>
-      <label style={{ fontSize: "14px" }}>Push Tags</label>
+      <label>Push Tags</label>
 
       <div
         style={{
@@ -163,8 +122,8 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
               }}
             >
               <svg
-                width="16" // Reduced from 24
-                height="16" // Reduced from 24
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -192,7 +151,7 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
               display: "flex",
               alignItems: "center",
               height: "32px",
-              pointerEvents: "auto", // This ensures only cursor change on hover
+              pointerEvents: "auto",
             }}
             title="Clear all"
           >
@@ -202,7 +161,7 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              style={{ pointerEvents: "none" }} // This prevents any hover effects on the SVG
+              style={{ pointerEvents: "none" }}
             >
               <path
                 d="M20 5H9.37727C9.0269 5 8.69017 5.14684 8.44873 5.40723L3.70711 10.4072C3.31658 10.8215 3.31658 11.4547 3.70711 11.8689L8.44873 16.8689C8.69017 17.1293 9.0269 17.2762 9.37727 17.2762H20C20.5523 17.2762 21 16.8285 21 16.2762V6C21 5.44772 20.5523 5 20 5Z"
@@ -223,10 +182,8 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
         )}
       </div>
 
-      {/* Autocomplete MultiSelect */}
       <div style={{ position: "relative" }}>
         <div style={{ position: "relative", width: "100%" }}>
-          {/* Input field */}
           <input
             ref={inputRef}
             type="text"
@@ -247,16 +204,16 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
               outline: "none",
               boxSizing: "border-box",
               transition: "border-color 0.2s ease",
+              backgroundColor: "rgb(255 255 255 / 0%)",
             }}
           />
-          {/* Dropdown arrow */}
           <span
             style={{
               position: "absolute",
               right: "10px",
               top: "50%",
-              transform: "translateY(-50%) rotate(180deg)", // Added rotate to make ▲ appear as V
-              fontSize: "12px", // Reduced from 14px
+              transform: "translateY(-50%) rotate(180deg)",
+              fontSize: "12px",
               color: "#666",
               cursor: "pointer",
             }}
@@ -280,13 +237,11 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
               border: "1px solid #09ab00",
               borderTop: "1px solid #09ab00",
               zIndex: 100,
-              boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)", // Added subtle shadow
+              boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)",
             }}
           >
             {filteredData.map((item) => {
-              const exists = selectedItems.some(
-                (i) => i.id === item.id && i.name === item.name
-              );
+              const exists = selectedItems.some((i) => i.id === item.id);
               return (
                 <button
                   key={item.id}
@@ -301,40 +256,40 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
                   }}
                   style={{
                     width: "100%",
-                    padding: "4px 8px", // Reduced padding
+                    padding: "4px 8px",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
                     backgroundColor: exists ? "rgba(9,171,0,.2)" : "#fff",
                     transition: "background-color 0.3s ease",
-                    fontSize: "14px", // Match input font size
-                    gap: "8px", // Reduced gap
+                    fontSize: "14px",
+                    gap: "8px",
                     border: "none",
                     outline: "none",
                     textAlign: "left",
-                    height: "32px", // Reduced height
+                    height: "32px",
                     boxSizing: "border-box",
-                    minHeight: "32px", // Add minimum height
-                    lineHeight: "1.2", // Add line height to control text spacing
-                    touchAction: "manipulation", // Prevent double-tap zoom
+                    minHeight: "32px",
+                    lineHeight: "1.2",
+                    touchAction: "manipulation",
                   }}
                 >
                   <span
                     style={{
                       display: "inline-block",
-                      width: "14px", // Fixed width for checkmark
-                      fontSize: "14px", // Smaller checkmark
+                      width: "14px",
+                      fontSize: "14px",
                       color: exists ? "#333" : "#ccc",
-                      textAlign: "center", // Center the checkmark
+                      textAlign: "center",
                     }}
                   >
-                    {exists ? "✓" : ""} {/* Changed to simpler checkmark */}
+                    {exists ? "✓" : ""}
                   </span>
                   <span
                     style={{
                       fontSize: "14px",
                       color: "#333",
-                      flex: 1, // Take remaining space
+                      flex: 1,
                     }}
                   >
                     {item.name}

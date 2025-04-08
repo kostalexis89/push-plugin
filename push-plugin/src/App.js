@@ -1,36 +1,32 @@
 import React, { useState, useEffect } from "react";
 import MultiSelect from "./components/MultiSelect.js";
+import SendPush from "./components/SendPush.js";
 import "./App.css";
 
 const App = ({ data }) => {
+  console.log("Data received:", data);
   const [selectedTags, setSelectedTags] = useState([]);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [tags, setTags] = useState([]);
 
   useEffect(() => {
-    setTitle(data?.content["storyline-title"] || "");
-    setMessage(data?.content["storyline-leadtext"] || "");
+    setTitle(data?.payload["storyline-title"] || "");
+    setMessage(data?.payload["storyline-leadtext"] || "");
   }, [data]);
 
-  console.log(title);
-
   useEffect(() => {
-    console.log("Fetching tags...");
-    fetch(
-      `${data?.pushConfig["api-url"]}${data?.pushConfig.clientId}/tags/${data?.pushConfig.applId}`,
-      {
-        method: "GET",
-        headers: { Authorization: `Bearer ${data?.pushConfig.token}` },
-      }
-    )
+    fetch(`${data?.pushConfig["api-url"]}${data?.pushConfig.clientId}/tags`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${data?.pushConfig.token}` },
+    })
       .then((res) => res.json())
       .then((data) => {
         setTags(data);
       });
   }, [data?.pushConfig]);
 
-  const sendPush = () => {
+  const handleSendPush = () => {
     if (selectedTags.size === 0) {
       alert("Select at least one tag.");
       return;
@@ -60,77 +56,14 @@ const App = ({ data }) => {
         setSelectedItems={setSelectedTags}
         selectedItems={selectedTags}
       />
-
-      <label
-        htmlFor="pushTitle"
-        style={{ fontWeight: "bold", fontSize: "14px" }}
-      >
-        Push Title
-      </label>
-      <input
-        id="pushTitle"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "8px", // Changed from "8px 0" to "8px"
-          marginBottom: "10px",
-          border: "1px solid #ccc",
-          borderRadius: "5px",
-          resize: "none",
-          outline: "none",
-          boxSizing: "border-box", // Add this to match MultiSelect
-        }}
-        onFocus={(e) => (e.target.style.borderColor = "#555")}
-        onBlur={(e) => (e.target.style.borderColor = "#ccc")}
+      <SendPush
+        title={title}
+        setTitle={setTitle}
+        message={message}
+        setMessage={setMessage}
+        selectedTags={selectedTags}
+        onSend={handleSendPush}
       />
-
-      <label
-        htmlFor="pushMessage"
-        style={{ fontWeight: "bold", fontSize: "14px" }}
-      >
-        Push Message
-      </label>
-      <textarea
-        id="pushMessage"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "8px", // Changed from "8px 0" to "8px"
-          height: "60px",
-          border: "1px solid #ccc",
-          borderRadius: "5px",
-          resize: "none",
-          outline: "none",
-          boxSizing: "border-box", // Add this to match MultiSelect
-        }}
-        onFocus={(e) => (e.target.style.borderColor = "#555")}
-        onBlur={(e) => (e.target.style.borderColor = "#ccc")}
-      />
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginTop: "10px",
-        }}
-      >
-        <button
-          onClick={sendPush}
-          style={{
-            padding: "6px 24px",
-            background: selectedTags.size > 0 ? "black" : "#ccc",
-            color: "white",
-            border: "none",
-            cursor: selectedTags.size > 0 ? "pointer" : "not-allowed",
-            fontSize: "14px",
-          }}
-          disabled={selectedTags.size === 0}
-        >
-          Send
-        </button>
-      </div>
     </div>
   );
 };

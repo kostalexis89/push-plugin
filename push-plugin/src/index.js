@@ -4,12 +4,12 @@ import App from "./App";
 import "./App.css";
 
 const dummyData = {
-  content: {
+  payload: {
     "storyline-title": "Initial Title",
     "storyline-leadtext": "Initial Lead text",
   },
   pushConfig: {
-    "api-url": "https://webpush-demo.ethinking.de/push-api/v3/",
+    "api-url": "https://webpush-demo.ethinking.de/push-admin-api/v3/",
     clientId: "test",
     applId: "2614",
     token: "Qcb9ZasLCTU0Oq9C6EnO2fNLDSAzXro2e",
@@ -42,7 +42,6 @@ class PushPlugin extends HTMLElement {
   }
 
   async connectedCallback() {
-    console.log(this.getAttribute("data"));
     if (this.rendered) return;
 
     const BASE_URL = "https://kostalexis89.github.io/push-plugin";
@@ -76,7 +75,6 @@ class PushPlugin extends HTMLElement {
     const data = JSON.parse(
       this.getAttribute("data") || JSON.stringify(dummyData)
     );
-    console.log(data);
     ReactDOM.render(<App data={data} />, this.mountPoint);
 
     this.rendered = true;
