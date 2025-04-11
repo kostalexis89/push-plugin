@@ -18,10 +18,10 @@ const PushMessageInput = ({ message, setMessage }) => {
           outline: "none",
           boxSizing: "border-box",
           marginTop: "5px",
-          fontFamily: "inherit", // This ensures it inherits the font from its parent
-          fontSize: "14px", // Match the input font size
-          lineHeight: "1.5", // Add line height for better readability
-          fontWeight: "200", // Normal font weight
+          fontFamily: "inherit",
+          fontSize: "14px",
+          lineHeight: "1.5",
+          fontWeight: "200",
         }}
         onFocus={(e) => (e.target.style.borderColor = "#09ab00")}
         onBlur={(e) => (e.target.style.borderColor = "#ccc")}
