@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import MultiSelect from "./components/MultiSelect.js";
 import SendPush from "./components/SendPush.js";
+import PushTitleInput from "./components/PushTitleInput";
+import PushMessageInput from "./components/PushMessageInput";
 import "./App.css";
 
 const App = ({ data }) => {
@@ -8,6 +10,8 @@ const App = ({ data }) => {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [tags, setTags] = useState([]);
+  const [showTagValidation, setShowTagValidation] = useState(false);
+  const [hasAttemptedToSubmit, setHasAttemptedToSubmit] = useState(false);
 
   useEffect(() => {
     setTitle(data?.payload.title || "");
@@ -26,10 +30,12 @@ const App = ({ data }) => {
   }, [data?.pushConfig]);
 
   const handleSendPush = () => {
-    if (selectedTags.size === 0) {
-      alert("Select at least one tag.");
+    setHasAttemptedToSubmit(true);
+    if (selectedTags.length === 0) {
+      setShowTagValidation(true);
       return;
     }
+    setShowTagValidation(false);
 
     const payload = {
       title,
@@ -48,18 +54,31 @@ const App = ({ data }) => {
       .catch((err) => alert(err.message));
   };
 
+  useEffect(() => {
+    if (hasAttemptedToSubmit) {
+      setShowTagValidation(selectedTags.length === 0);
+    }
+  }, [selectedTags, hasAttemptedToSubmit]);
+
   return (
     <div>
       <MultiSelect
         data={tags}
         setSelectedItems={setSelectedTags}
         selectedItems={selectedTags}
+        showValidation={showTagValidation}
+        onSelect={() => {
+          if (hasAttemptedToSubmit && selectedTags.length === 0) {
+            setShowTagValidation(true);
+          } else {
+            setShowTagValidation(false);
+          }
+        }}
       />
+      <PushTitleInput title={title} setTitle={setTitle} />
+      <PushMessageInput message={message} setMessage={setMessage} />
       <SendPush
-        title={title}
-        setTitle={setTitle}
-        message={message}
-        setMessage={setMessage}
+        published={data.payload?.url !== null}
         selectedTags={selectedTags}
         onSend={handleSendPush}
       />

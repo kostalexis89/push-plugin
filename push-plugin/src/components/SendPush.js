@@ -1,77 +1,37 @@
 import React from "react";
 
-const SendPush = ({
-  title,
-  setTitle,
-  message,
-  setMessage,
-  selectedTags,
-  onSend,
-}) => {
+const SendPush = ({ selectedTags, onSend, published }) => {
+  const handleClick = (e) => {
+    if (!published) {
+      e.preventDefault();
+      return;
+    }
+    onSend(e);
+  };
+
   return (
-    <div>
-      <label htmlFor="pushTitle">Push Title</label>
-      <input
-        id="pushTitle"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "flex-end",
+        marginTop: "10px",
+      }}
+    >
+      <button
+        onClick={handleClick}
         style={{
-          width: "100%",
-          padding: "8px",
-          marginBottom: "10px",
-          border: "1px solid #ccc",
+          padding: "6px 24px",
+          background: published ? "#09ab00" : "#ccc",
+          color: "white",
+          border: "none",
+          cursor: published ? "pointer" : "not-allowed",
+          fontSize: "14px",
           borderRadius: "5px",
-          resize: "none",
-          outline: "none",
-          boxSizing: "border-box",
-          marginTop: "5px",
         }}
-        onFocus={(e) => (e.target.style.borderColor = "#09ab00")}
-        onBlur={(e) => (e.target.style.borderColor = "#ccc")}
-      />
-
-      <label htmlFor="pushMessage">Push Message</label>
-      <textarea
-        id="pushMessage"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "8px",
-          height: "60px",
-          border: "1px solid #ccc",
-          borderRadius: "5px",
-          resize: "none",
-          outline: "none",
-          boxSizing: "border-box",
-          marginTop: "5px",
-        }}
-        onFocus={(e) => (e.target.style.borderColor = "#09ab00")}
-        onBlur={(e) => (e.target.style.borderColor = "#ccc")}
-      />
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginTop: "10px",
-        }}
+        disabled={!published}
       >
-        <button
-          onClick={onSend}
-          style={{
-            padding: "6px 24px",
-            background: selectedTags.size > 0 ? "black" : "#ccc",
-            color: "white",
-            border: "none",
-            cursor: selectedTags.size > 0 ? "pointer" : "not-allowed",
-            fontSize: "14px",
-          }}
-          disabled={selectedTags.size === 0}
-        >
-          Send
-        </button>
-      </div>
+        Send
+      </button>
     </div>
   );
 };

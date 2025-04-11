@@ -1,30 +1,69 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 
-const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
+const MultiSelect = ({
+  data,
+  selectedItems,
+  setSelectedItems,
+  showValidation,
+  onSelect,
+}) => {
   const [query, setQuery] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
   const [preventQueryClear, setPreventQueryClear] = useState(false);
 
-  // Remove flattenData usage and just filter the data array directly
-  const filteredData = query
-    ? data.filter((item) =>
-        item.name.toLowerCase().includes(query.toLowerCase())
-      )
-    : data;
+  // Memoize filtered data
+  const filteredData = useMemo(
+    () =>
+      query
+        ? data.filter((item) =>
+            item.name.toLowerCase().includes(query.toLowerCase())
+          )
+        : data,
+    [query, data]
+  );
 
-  useEffect(() => {
-    const metaViewport = document.querySelector('meta[name="viewport"]');
-    if (!metaViewport) {
-      const meta = document.createElement("meta");
-      meta.name = "viewport";
-      meta.content =
-        "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
-      document.head.appendChild(meta);
-    }
+  // Memoize handlers
+  const handleSelect = useCallback(
+    (item) => {
+      if (showValidation) {
+        onSelect();
+      }
+      setPreventQueryClear(true);
+      if (selectedItems.some((i) => i.id === item.id)) {
+        setSelectedItems(
+          selectedItems.filter((selected) => selected.id !== item.id)
+        );
+      } else {
+        setSelectedItems([...selectedItems, item]);
+      }
+      setTimeout(() => {
+        setPreventQueryClear(false);
+      }, 200);
+    },
+    [showValidation, onSelect, selectedItems, setSelectedItems]
+  );
+
+  const handleRemoveItem = useCallback(
+    (itemToRemove) => {
+      setSelectedItems(selectedItems.filter((item) => item !== itemToRemove));
+    },
+    [selectedItems, setSelectedItems]
+  );
+
+  const handleInputChange = useCallback((e) => {
+    setQuery(e.target.value);
+    setIsDropdownOpen(true);
   }, []);
 
+  // Use cleanup for event listeners
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -40,35 +79,30 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    // Use capture phase for better performance
+    document.addEventListener("mousedown", handleClickOutside, true);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside, true);
   }, [preventQueryClear]);
 
-  const handleSelect = (item) => {
-    setPreventQueryClear(true);
-    if (selectedItems.some((i) => i.id === item.id)) {
-      setSelectedItems(
-        selectedItems.filter((selected) => selected.id !== item.id)
-      );
-    } else {
-      setSelectedItems([...selectedItems, item]);
+  // Remove viewport meta tag on unmount
+  useEffect(() => {
+    const metaViewport = document.querySelector('meta[name="viewport"]');
+    if (!metaViewport) {
+      const meta = document.createElement("meta");
+      meta.name = "viewport";
+      meta.content =
+        "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
+      document.head.appendChild(meta);
     }
-    setTimeout(() => {
-      setPreventQueryClear(false);
-    }, 200);
-  };
 
-  const handleRemoveItem = (itemToRemove) => {
-    setSelectedItems(selectedItems.filter((item) => item !== itemToRemove));
-  };
-
-  const handleInputChange = (e) => {
-    setQuery(e.target.value);
-    setIsDropdownOpen(true);
-  };
+    return () => {
+      const addedMeta = document.querySelector('meta[name="viewport"]');
+      if (addedMeta) {
+        addedMeta.remove();
+      }
+    };
+  }, []);
 
   const handleInputFocus = () => {
     setIsDropdownOpen(true);
@@ -83,7 +117,15 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
 
   return (
     <div style={{ paddingBottom: "10px" }}>
-      <label>Push Tags</label>
+      <label
+        htmlFor="tags-input"
+        style={{
+          display: "block",
+          marginBottom: "5px",
+        }}
+      >
+        Push Tags
+      </label>
 
       <div
         style={{
@@ -103,7 +145,6 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
               alignItems: "center",
               fontSize: "14px",
               height: "32px",
-              borderRadius: "4px",
               boxSizing: "border-box",
             }}
           >
@@ -182,32 +223,50 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
         )}
       </div>
 
-      <div style={{ position: "relative" }}>
+      <div
+        style={{
+          position: "relative",
+          borderBottom: `1px solid #999`,
+        }}
+      >
         <div style={{ position: "relative", width: "100%" }}>
+          {showValidation && (
+            <span
+              style={{
+                position: "absolute",
+                right: "30px",
+                top: "2px",
+                fontSize: "10px",
+                color: "#dc3545",
+                lineHeight: "1",
+                pointerEvents: "none",
+              }}
+            >
+              *select tags
+            </span>
+          )}
           <input
+            id="tags-input"
             ref={inputRef}
             type="text"
             placeholder="Find Tags"
             value={query}
             onChange={handleInputChange}
-            onFocus={(e) => {
-              handleInputFocus();
-            }}
+            onFocus={handleInputFocus}
             onKeyDown={handleKeyDown}
             style={{
               fontSize: "14px",
               width: "100%",
               padding: "8px",
               paddingRight: "30px",
-              border: "none",
-              borderBottom: "1px solid #999",
+              border: showValidation ? "1px solid #dc3545" : "none",
               outline: "none",
               boxSizing: "border-box",
-              transition: "border-color 0.2s ease",
-              backgroundColor: "rgb(255 255 255 / 0%)",
+              backgroundColor: showValidation ? "#fff8f8" : "transparent",
             }}
           />
-          <span
+          <button
+            type="button"
             style={{
               position: "absolute",
               right: "10px",
@@ -216,11 +275,15 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
               fontSize: "12px",
               color: "#666",
               cursor: "pointer",
+              background: "none",
+              border: "none",
+              padding: 0,
             }}
             onClick={() => inputRef.current.focus()}
+            aria-label="Focus input"
           >
             ▲
-          </span>
+          </button>
         </div>
 
         {isDropdownOpen && (
@@ -304,4 +367,11 @@ const MultiSelect = ({ data, selectedItems, setSelectedItems }) => {
   );
 };
 
-export default React.memo(MultiSelect);
+// Memoize the entire component with custom comparison
+export default React.memo(MultiSelect, (prevProps, nextProps) => {
+  return (
+    prevProps.data === nextProps.data &&
+    prevProps.selectedItems === nextProps.selectedItems &&
+    prevProps.showValidation === nextProps.showValidation
+  );
+});
