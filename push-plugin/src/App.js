@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import MultiSelect from "./components/MultiSelect.js";
 import SendPush from "./components/SendPush.js";
 import PushTitleInput from "./components/PushTitleInput";
 import PushMessageInput from "./components/PushMessageInput";
 import "./App.css";
+import { fetchTags, sendPush } from "./services/api.js";
 
 const App = ({ data }) => {
   const [selectedTags, setSelectedTags] = useState([]);
@@ -12,6 +13,8 @@ const App = ({ data }) => {
   const [tags, setTags] = useState([]);
   const [showTagValidation, setShowTagValidation] = useState(false);
   const [hasAttemptedToSubmit, setHasAttemptedToSubmit] = useState(false);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setTitle(data?.payload.title || "");
@@ -19,40 +22,57 @@ const App = ({ data }) => {
   }, [data]);
 
   useEffect(() => {
-    fetch(`${data?.pushConfig["api-url"]}${data?.pushConfig.clientId}/tags`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${data?.pushConfig.token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setTags(data);
-      });
-  }, [data?.pushConfig]);
-
-  const handleSendPush = () => {
-    setHasAttemptedToSubmit(true);
-    if (selectedTags.length === 0) {
-      setShowTagValidation(true);
-      return;
-    }
-    setShowTagValidation(false);
-
-    const payload = {
-      title,
-      message,
-      tags: Array.from(selectedTags),
+    const loadTags = async () => {
+      try {
+        setIsLoading(true);
+        const tagsData = await fetchTags(data?.pushConfig);
+        setTags(tagsData);
+      } catch (err) {
+        setError("Failed to load tags");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    console.log("Sending payload:", payload);
+    if (data?.pushConfig) {
+      loadTags();
+    }
+  }, [data?.pushConfig]);
 
-    fetch("https://example.com/push", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => (res.ok ? alert("Push sent!") : alert("Failed!")))
-      .catch((err) => alert(err.message));
-  };
+  const handleTagSelect = useCallback(() => {
+    if (hasAttemptedToSubmit) {
+      setShowTagValidation(selectedTags.length === 0);
+    }
+  }, [hasAttemptedToSubmit, selectedTags.length]);
+
+  const handleSendPush = useCallback(async () => {
+    try {
+      setHasAttemptedToSubmit(true);
+      if (selectedTags.length === 0) {
+        setShowTagValidation(true);
+        return;
+      }
+      setShowTagValidation(false);
+      setIsLoading(true);
+
+      const success = await sendPush({
+        title,
+        message,
+        tags: Array.from(selectedTags),
+      });
+
+      if (success) {
+        alert("Push sent successfully!");
+      } else {
+        throw new Error("Failed to send push");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [title, message, selectedTags]);
 
   useEffect(() => {
     if (hasAttemptedToSubmit) {
@@ -62,26 +82,27 @@ const App = ({ data }) => {
 
   return (
     <div>
-      <MultiSelect
-        data={tags}
-        setSelectedItems={setSelectedTags}
-        selectedItems={selectedTags}
-        showValidation={showTagValidation}
-        onSelect={() => {
-          if (hasAttemptedToSubmit && selectedTags.length === 0) {
-            setShowTagValidation(true);
-          } else {
-            setShowTagValidation(false);
-          }
-        }}
-      />
-      <PushTitleInput title={title} setTitle={setTitle} />
-      <PushMessageInput message={message} setMessage={setMessage} />
-      <SendPush
-        published={data.payload?.url !== null}
-        selectedTags={selectedTags}
-        onSend={handleSendPush}
-      />
+      {error && <div className="error-message">{error}</div>}
+      {isLoading ? (
+        <div>Loading tags...</div>
+      ) : (
+        <>
+          <MultiSelect
+            data={tags}
+            setSelectedItems={setSelectedTags}
+            selectedItems={selectedTags}
+            showValidation={showTagValidation}
+            onSelect={handleTagSelect}
+          />
+          <PushTitleInput title={title} setTitle={setTitle} />
+          <PushMessageInput message={message} setMessage={setMessage} />
+          <SendPush
+            published={data.payload?.url !== null}
+            selectedTags={selectedTags}
+            onSend={handleSendPush}
+          />
+        </>
+      )}
     </div>
   );
 };
